@@ -77,19 +77,24 @@ public class DicomController: ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllStudies()
+    public async Task<IActionResult> GetAllStudies([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         try
         {
+            if (pageIndex < 1) pageIndex = 1;
+            if(pageSize < 1) pageSize = 10;
+
             var studies = await _context.Studies
-                .OrderByDescending(r => r.UploadDate)
+                .OrderByDescending(s => s.Id)
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-            
+        
             return Ok(studies);
         }
         catch (Exception e)
         {
-            return StatusCode(500, $"Veritabanından veriler alınırken bir hata oluştu: {e.Message}");
+            return StatusCode(500, $"Veriler getirilirken bir hata oluştu: {e.Message}");
         }
     }
     
