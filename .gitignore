@@ -8,6 +8,7 @@
 
 # dicom images
 .*dcm
+/DicomImages/
 
 # User-specific files
 *.rsuser
