@@ -11,4 +11,6 @@ public class AppDbContext : DbContext
     }
     public DbSet<Study> Studies { get; set; }
     public DbSet<StudyFile> StudyFiles { get; set; }
+    public DbSet<User> Users { get; set; }
+    
 }
