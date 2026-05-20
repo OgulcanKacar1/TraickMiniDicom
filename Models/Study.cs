@@ -12,4 +12,12 @@ public class Study
     public String Resolution { get; set; } = string.Empty;
 
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+    
+    
+    //Navigation property for related StudyFiles
+    public ICollection<StudyFile> DicomFiles { get; set; } = new List<StudyFile>();
+    
+    public int UserId { get; set; }
+    public User User { get; set; }
+    
 }

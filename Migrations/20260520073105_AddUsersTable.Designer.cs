@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TraickMiniDicom.Data;
@@ -11,9 +12,11 @@ using TraickMiniDicom.Data;
 namespace TraickMiniDicom.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520073105_AddUsersTable")]
+    partial class AddUsersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,12 +56,7 @@ namespace TraickMiniDicom.Migrations
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Studies");
                 });
@@ -99,32 +97,17 @@ namespace TraickMiniDicom.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("TraickMiniDicom.Models.Study", b =>
-                {
-                    b.HasOne("TraickMiniDicom.Models.User", "User")
-                        .WithMany("Studies")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TraickMiniDicom.Models.StudyFile", b =>
@@ -141,11 +124,6 @@ namespace TraickMiniDicom.Migrations
             modelBuilder.Entity("TraickMiniDicom.Models.Study", b =>
                 {
                     b.Navigation("DicomFiles");
-                });
-
-            modelBuilder.Entity("TraickMiniDicom.Models.User", b =>
-                {
-                    b.Navigation("Studies");
                 });
 #pragma warning restore 612, 618
         }
