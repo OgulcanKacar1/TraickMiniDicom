@@ -17,4 +17,7 @@ public class Study
     //Navigation property for related StudyFiles
     public ICollection<StudyFile> DicomFiles { get; set; } = new List<StudyFile>();
     
+    public int UserId { get; set; }
+    public User User { get; set; }
+    
 }
