@@ -10,6 +10,9 @@
 .*dcm
 /DicomImages/
 
+#planning file
+PLANNING.md
+
 # User-specific files
 *.rsuser
 *.suo
