@@ -12,8 +12,8 @@ using TraickMiniDicom.Data;
 namespace TraickMiniDicom.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260520073105_AddUsersTable")]
-    partial class AddUsersTable
+    [Migration("20260521074457_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,18 @@ namespace TraickMiniDicom.Migrations
 
             modelBuilder.Entity("TraickMiniDicom.Models.Study", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Modality")
                         .IsRequired()
@@ -53,31 +60,49 @@ namespace TraickMiniDicom.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("UploadDate")
+                    b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Studies");
                 });
 
             modelBuilder.Entity("TraickMiniDicom.Models.StudyFile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("StudyId")
-                        .HasColumnType("integer");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                    b.Property<DateTime>("UploadDate")
+                    b.Property<Guid>("StudyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -88,26 +113,51 @@ namespace TraickMiniDicom.Migrations
 
             modelBuilder.Entity("TraickMiniDicom.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TraickMiniDicom.Models.Study", b =>
+                {
+                    b.HasOne("TraickMiniDicom.Models.User", "User")
+                        .WithMany("Studies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TraickMiniDicom.Models.StudyFile", b =>
@@ -124,6 +174,11 @@ namespace TraickMiniDicom.Migrations
             modelBuilder.Entity("TraickMiniDicom.Models.Study", b =>
                 {
                     b.Navigation("DicomFiles");
+                });
+
+            modelBuilder.Entity("TraickMiniDicom.Models.User", b =>
+                {
+                    b.Navigation("Studies");
                 });
 #pragma warning restore 612, 618
         }

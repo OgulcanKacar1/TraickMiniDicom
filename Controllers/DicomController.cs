@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TraickMiniDicom.Data;
 using TraickMiniDicom.Models;
@@ -59,7 +60,6 @@ public class DicomController: ControllerBase
                     Modality = modality,
                     Series = series,
                     Resolution = resolution,
-                    UploadDate = DateTime.UtcNow
                 };
                 
                 //save to database
@@ -77,6 +77,7 @@ public class DicomController: ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAllStudies([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         try
