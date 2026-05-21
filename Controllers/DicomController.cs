@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TraickMiniDicom.Data;
 using TraickMiniDicom.Models;
+using TraickMiniDicom.Extensions;
+using TraickMiniDicom.Responses;
 
 namespace TraickMiniDicom.Controllers;
 
@@ -70,17 +72,24 @@ public class DicomController: ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAllStudies([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllStudies(
+        [FromQuery] int page = 1, 
+        [FromQuery] int limit = 10,
+        [FromQuery] string sort = "CreatedAt",
+        [FromQuery] string sortDir = "desc")
     {
-        if (pageIndex < 1) pageIndex = 1;
-        if(pageSize < 1) pageSize = 10;
-
-        var studies = await _context.Studies
-            .OrderByDescending(s => s.Id)
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-    
-        return Ok(studies);
+        var query = _context.Studies.AsQueryable();
+        
+        var pagedStudies =await query.ToPagedListAsync(page, limit, sort, sortDir);
+        
+        var response = new ApiResponse<PagedListResponse<Study>>
+        {
+            Success = true,
+            Message = "Dicom çalışmaları başarıyla getirildi.",
+            Data = pagedStudies
+            
+        };
+        
+        return Ok(response);
     }
 }
