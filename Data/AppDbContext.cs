@@ -1,13 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using TraickMiniDicom.Models;
+using TraickMiniDicom.Services;
 
 namespace TraickMiniDicom.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
     {
-        
+        _httpContextAccessor = httpContextAccessor;
     }
     public DbSet<Study> Studies { get; set; }
     public DbSet<StudyFile> StudyFiles { get; set; }
@@ -15,6 +18,14 @@ public class AppDbContext : DbContext
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        Guid? userId = null;
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            userId = parsedId;
+        }
+        
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {
@@ -22,6 +33,7 @@ public class AppDbContext : DbContext
             {
                 entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
                 entry.Entity.IsDeleted = false;
+                entry.Entity.CreatedBy = userId;
                 
                 if (entry.Entity.Id == Guid.Empty)
                 {
@@ -30,6 +42,7 @@ public class AppDbContext : DbContext
             }else if (entry.State == EntityState.Modified)
             {
                 entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                entry.Entity.UpdatedBy = userId;
             }
         }
         return base.SaveChangesAsync(cancellationToken);
