@@ -6,9 +6,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using TraickMiniDicom.Middlewares;
 
+using TraickMiniDicom.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+
+
+// Servis Kayıtları (Dependency Injection)
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStudyService, StudyService>();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TraickMiniDicom API", Version = "v1" });

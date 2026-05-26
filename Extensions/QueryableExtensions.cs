@@ -19,8 +19,8 @@ public static class QueryableExtensions
         var totalCount = await query.CountAsync(cancellationToken);
 
         // Map sort field name (camelCase API convention) to entity property name
-        var sortField = "CreatedDate";
-        if (sortFieldMapping != null && sortFieldMapping.TryGetValue(sort, out var mappedField))
+        var sortField = sort ?? "CreatedAt";
+        if (sortFieldMapping != null && sortFieldMapping.TryGetValue(sort ?? "", out var mappedField))
         {
             sortField = mappedField;
         }
