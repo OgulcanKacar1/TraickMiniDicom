@@ -31,10 +31,7 @@ public class DicomController: ControllerBase
             
         var response = await _studyService.UploadDicomAsync(file, userId);
         
-        if (!response.Success)
-            return BadRequest(response);
-            
-        return Ok(response);
+        return this.ToActionResult(response);
     }
 
     [HttpGet]
@@ -50,9 +47,6 @@ public class DicomController: ControllerBase
 
         var response = await _studyService.GetAllStudiesAsync(page, limit, sort, sortDir, userId);
         
-        if (!response.Success)
-            return BadRequest(response);
-            
-        return Ok(response);
+        return this.ToActionResult(response);
     }
 }

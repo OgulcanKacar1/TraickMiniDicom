@@ -21,20 +21,14 @@ public class AuthController: ControllerBase
     public async Task<IActionResult> Register([FromBody] UserRegisterDto request)
     {
         var response = await _authService.RegisterAsync(request);
-        if (!response.Success)
-            return BadRequest(response);
-            
-        return Ok(response);
+        return this.ToActionResult(response);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserLoginDto request)
     {
         var response = await _authService.LoginAsync(request);
-        if (!response.Success)
-            return BadRequest(response);
-            
-        return Ok(response);
+        return this.ToActionResult(response);
     }
 
     [Authorize] 
