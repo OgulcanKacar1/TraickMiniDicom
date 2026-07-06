@@ -156,6 +156,6 @@ public class StudyService : IStudyService
             Series = series,
             Resolution = resolution,
             UserId = userId
-        }
+        };
     }
 }
