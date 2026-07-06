@@ -25,7 +25,7 @@ public class AuthService : IAuthService
 
     public async Task<ServiceResult<string>> RegisterAsync(UserRegisterDto request)
     {
-        if (await _context.Users.IgnoreQueryFilters().AnyAsync(u => u.Email == request.Email))
+        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
         {
             return ServiceResult<string>.Failure("Bu e-posta adresi zaten kayıtlı.");
         }
@@ -35,8 +35,7 @@ public class AuthService : IAuthService
         var newUser = new User
         {
             Email = request.Email,
-            PasswordHash = passwordHash,
-            OrganizationId = request.OrganizationId 
+            PasswordHash = passwordHash
         };
 
         _context.Users.Add(newUser);
@@ -47,7 +46,7 @@ public class AuthService : IAuthService
 
     public async Task<ServiceResult<string>> LoginAsync(UserLoginDto request)
     {
-        var user = await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user == null)
         {
             return ServiceResult<string>.Failure("Kullanıcı bulunamadı.");

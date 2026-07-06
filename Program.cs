@@ -1,10 +1,11 @@
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using TraickMiniDicom.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 using TraickMiniDicom.Middlewares;
+
 using TraickMiniDicom.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,12 +17,11 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 // Servis Kayıtları (Dependency Injection)
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudyService, StudyService>();
-builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TraickMiniDicom API", Version = "v1" });
-
+        
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
