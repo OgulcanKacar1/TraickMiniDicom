@@ -39,6 +39,7 @@ public class StudyService : IStudyService
         // open file with fo-dicom
         var dicomFile = await DicomFile.OpenAsync(stream);
         var dataset = dicomFile.Dataset;
+        var parsedStudy = ExtractMetadataFromDicom(dataset,userId);
         
         // extracting dicom tags
         string patientName = dataset.GetSingleValueOrDefault(DicomTag.PatientName, "Bilinmeyen Hasta");
@@ -55,22 +56,14 @@ public class StudyService : IStudyService
 
         var existingStudy = await _context.Studies
             .Include(s => s.DicomFiles)
-            .FirstOrDefaultAsync(s => s.StudyInstanceUID == studyInstanceUID && s.UserId == userId);
+            .FirstOrDefaultAsync(s => s.StudyInstanceUID == parsedStudy.StudyInstanceUID && s.UserId == userId);
 
         Study targetStudy;
         
         // 2. Study Objesini Belirleme 
         if (existingStudy == null)
         {
-            targetStudy = new Study
-            {
-                PatientName = patientName,
-                StudyInstanceUID = studyInstanceUID,
-                Modality = modality,
-                Series = series,
-                Resolution = resolution,
-                UserId = userId
-            };
+            targetStudy = parsedStudy;
             
             _context.Studies.Add(targetStudy);
         }
@@ -143,5 +136,26 @@ public class StudyService : IStudyService
             Message = "Dicom çalışmaları başarıyla getirildi.",
             Data = pagedStudies
         };
+    }
+
+    private Study ExtractMetadataFromDicom(DicomDataset dataset, Guid userId){
+        string patientName = dataset.GetSingleValueOrDefault(DicomTag.PatientName,"Bilinmeyen Hasta");
+        string studyInstanceUID = dataset.GetSingleValueOrDefault(DicomTag.StudyInstanceUID, "Bilinmeyen Çalışma");
+        string modality = dataset.GetSingleValueOrDefault(DicomTag.Modality, "Bilinmeyen Modality");
+        string series = dataset.GetSingleValueOrDefault(DicomTag.SeriesNumber,0).ToString();
+
+        int rows = dataset.GetSingleValueOrDefault(DicomTag.Rows, 0);
+        int columns = dataset.GetSingleValueOrDefault(DicomTag.Columns, 0);
+        string resolution = $"{rows}x{columns}";
+
+        return new Study
+        {
+            PatientName = patientName,
+            StudyInstanceUID = studyInstanceUID,
+            Modality = modality,
+            Series = series,
+            Resolution = resolution,
+            UserId = userId
+        }
     }
 }
