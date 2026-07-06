@@ -1,15 +1,18 @@
 using System.Text.Json;
 using TraickMiniDicom.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace TraickMiniDicom.Middlewares;
 
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
     
-    public ExceptionMiddleware(RequestDelegate next)
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
     
     public async Task InvokeAsync(HttpContext httpContext)
@@ -21,6 +24,7 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Kritik bir hata oluştu. Hata: {Message}", ex.Message);
             //hata yakalandığında akışı durdur ve hatayı işle
             await HandleExceptionAsync(httpContext, ex);
         }
