@@ -7,6 +7,7 @@ using TraickMiniDicom.Responses;
 using TraickMiniDicom.Extensions;
 using TraickMiniDicom.DTOs;
 using System.IO;
+using Mapster;
 
 namespace TraickMiniDicom.Services;
 
@@ -114,22 +115,7 @@ public class StudyService : IStudyService
         await _context.SaveChangesAsync();
         
         // Entity olan targetStudy'i DTO'ya (Taşıyıcıya) çeviriyoruz:
-        var resultDto = new StudyResponseDto
-        {
-            Id = targetStudy.Id,
-            PatientName = targetStudy.PatientName,
-            StudyInstanceUID = targetStudy.StudyInstanceUID,
-            Modality = targetStudy.Modality,
-            Series = targetStudy.Series,
-            Resolution = targetStudy.Resolution,
-            CreatedAt = targetStudy.CreatedAt,
-            DicomFiles = targetStudy.DicomFiles.Select(df => new StudyFileDto
-            {
-                Id = df.Id,
-                FilePath = df.FilePath,
-                CreatedAt = df.CreatedAt
-            }).ToList()
-        };
+        var resultDto = targetStudy.Adapt<StudyResponseDto>();
 
         return new ApiResponse<StudyResponseDto>
         {
@@ -147,22 +133,7 @@ public class StudyService : IStudyService
         var query = _context.Studies
             .Include(x => x.DicomFiles)
             .Where(x => x.UserId == userId)
-            .Select(s => new StudyResponseDto
-            {
-                Id = s.Id,
-                PatientName = s.PatientName,
-                StudyInstanceUID = s.StudyInstanceUID,
-                Modality = s.Modality,
-                Series = s.Series,
-                Resolution = s.Resolution,
-                CreatedAt = s.CreatedAt,
-                DicomFiles = s.DicomFiles.Select(df => new StudyFileDto
-                {
-                    Id = df.Id,
-                    FilePath = df.FilePath,
-                    CreatedAt = df.CreatedAt
-                }).ToList()
-            });
+            .ProjectToType<StudyResponseDto>();
         
         var pagedStudies = await query.ToPagedListAsync(page, limit, sort, sortDir);
         
