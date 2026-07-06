@@ -1,7 +1,9 @@
 namespace TraickMiniDicom.Services
 {
-    public interface ICurrentUser{
+    public interface ICurrentUser
+    {
         Guid UserId { get; }
-        // Devamı gelebilir...
+        Guid? OrganizationId { get; }
+        string Role { get; }
     }
 }
