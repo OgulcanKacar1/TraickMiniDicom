@@ -23,15 +23,11 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
     
-    public async Task<ApiResponse<string>> RegisterAsync(UserRegisterDto request)
+    public async Task<ServiceResult<string>> RegisterAsync(UserRegisterDto request)
     {
         if(await _context.Users.AnyAsync(u => u.Email == request.Email))
         {
-            return new ApiResponse<string>
-            {
-                Success = false,
-                Message = "Bu e-posta adresi zaten kayıtlı."
-            };
+            return ServiceResult<string>.Failure("Bu e-posta adresi zaten kayıtlı.");
         } 
         
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -45,41 +41,24 @@ public class AuthService : IAuthService
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
         
-        return new ApiResponse<string>
-        {
-            Message = "Kayıt başarıyla tamamlandı.",
-            Success = true
-        };
+        return ServiceResult<string>.IsSuccess("Kayıt başarıyla tamamlandı.");
     }
     
-    public async Task<ApiResponse<string>> LoginAsync(UserLoginDto request)
+    public async Task<ServiceResult<string>> LoginAsync(UserLoginDto request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user == null)
         {
-            return new ApiResponse<string>
-            {
-                Success = false,
-                Message = "Kullanıcı bulunamadı."
-            };
+            return ServiceResult<string>.Failure("Kullanıcı bulunamadı.");
         }
         
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
-            return new ApiResponse<string>
-            {
-                Success = false,
-                Message = "Hatalı Şifre Girdiniz."
-            };
+            return ServiceResult<string>.Failure("Hatalı Şifre Girdiniz.");
         }
         
         string token = CreateToken(user);
-        return new ApiResponse<string>
-        {
-            Data = token,
-            Message = "Giriş başarılı.",
-            Success = true
-        };
+        return ServiceResult<string>.IsSuccess(token);
         
     }
     
