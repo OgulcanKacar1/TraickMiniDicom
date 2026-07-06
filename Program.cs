@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 // Servis Kayıtları (Dependency Injection)
 builder.Services.AddScoped<IAuthService, AuthService>();

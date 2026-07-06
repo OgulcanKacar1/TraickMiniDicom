@@ -3,6 +3,7 @@ using TraickMiniDicom.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using TraickMiniDicom.Services;
 using System.Security.Claims;
+using TraickMiniDicom.Extensions;
 
 namespace TraickMiniDicom.Controllers;
 
@@ -11,10 +12,12 @@ namespace TraickMiniDicom.Controllers;
 public class AuthController: ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ICurrentUser _currentUser;
     
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ICurrentUser currentUser)
     {
         _authService = authService;
+        _currentUser = currentUser;
     }
 
     [HttpPost("register")]
@@ -37,7 +40,7 @@ public class AuthController: ControllerBase
     {
         // İçeri girmeyi başaran kişinin Token'ının içinden bilgilerini okuma
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = _currentUser.UserId;
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
         return Ok($" Hoş geldin {email}. Sistemdeki ID numaran: {userId}, Rolün: {role}");
