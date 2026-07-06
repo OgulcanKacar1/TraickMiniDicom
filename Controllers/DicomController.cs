@@ -7,6 +7,7 @@ using TraickMiniDicom.Services;
 using System.Security.Claims;
 using TraickMiniDicom.Responses;
 using TraickMiniDicom.Models;
+using TraickMiniDicom.Extensions;
 
 namespace TraickMiniDicom.Controllers;
 
@@ -16,18 +17,18 @@ namespace TraickMiniDicom.Controllers;
 public class DicomController: ControllerBase
 {
     private readonly IStudyService _studyService;
+    private readonly ICurrentUser _currentUser;
     
-    public DicomController(IStudyService studyService)
+    public DicomController(IStudyService studyService, ICurrentUser currentUser)
     {
         _studyService = studyService;
+        _currentUser = currentUser;
     }
     
     [HttpPost("upload")]
     public async Task<IActionResult> UploadDicom(IFormFile file)
     {
-        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
+        var userId = _currentUser.UserId;
             
         var response = await _studyService.UploadDicomAsync(file, userId);
         
@@ -41,9 +42,7 @@ public class DicomController: ControllerBase
         [FromQuery] string sort = "CreatedAt",
         [FromQuery] string sortDir = "desc")
     {
-        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
+        var userId = _currentUser.UserId;
 
         var response = await _studyService.GetAllStudiesAsync(page, limit, sort, sortDir, userId);
         
