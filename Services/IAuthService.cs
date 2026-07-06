@@ -5,6 +5,6 @@ namespace TraickMiniDicom.Services;
 
 public interface IAuthService
 {
-    Task<ApiResponse<string>> RegisterAsync(UserRegisterDto request);
-    Task<ApiResponse<string>> LoginAsync(UserLoginDto request);
+    Task<ServiceResult<string>> RegisterAsync(UserRegisterDto request);
+    Task<ServiceResult<string>> LoginAsync(UserLoginDto request);
 }

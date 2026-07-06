@@ -6,6 +6,6 @@ namespace TraickMiniDicom.Services;
 
 public interface IStudyService
 {
-    Task<ApiResponse<StudyResponseDto>> UploadDicomAsync(IFormFile file, Guid userId);
-    Task<ApiResponse<PagedListResponse<StudyResponseDto>>> GetAllStudiesAsync(int page, int limit, string sort, string sortDir, Guid userId);
+    Task<ServiceResult<StudyResponseDto>> UploadDicomAsync(IFormFile file, Guid userId);
+    Task<ServiceResult<PagedListResponse<StudyResponseDto>>> GetAllStudiesAsync(int page, int limit, string sort, string sortDir, Guid userId);
 }
