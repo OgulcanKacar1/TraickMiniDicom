@@ -21,16 +21,12 @@ public class StudyService : IStudyService
         _context = context;
     }
 
-    public async Task<ApiResponse<StudyResponseDto>> UploadDicomAsync(IFormFile file, Guid userId)
+    public async Task<ServiceResult<StudyResponseDto>> UploadDicomAsync(IFormFile file, Guid userId)
     {
         // file control
         if (file == null || file.Length == 0)
         {
-            return new ApiResponse<StudyResponseDto>
-            {
-                Success = false,
-                Message = "Geçersiz dosya. Lütfen geçerli bir DICOM dosyası yükleyin."
-            };
+            return ServiceResult<StudyResponseDto>.Failure("Geçersiz dosya. Lütfen geçerli bir DICOM dosyası yükleyin.");
         }
 
         // reading file
@@ -40,19 +36,6 @@ public class StudyService : IStudyService
         var dicomFile = await DicomFile.OpenAsync(stream);
         var dataset = dicomFile.Dataset;
         var parsedStudy = ExtractMetadataFromDicom(dataset,userId);
-        
-        // extracting dicom tags
-        string patientName = dataset.GetSingleValueOrDefault(DicomTag.PatientName, "Bilinmeyen Hasta");
-        string studyInstanceUID = dataset.GetSingleValueOrDefault(DicomTag.StudyInstanceUID, "Bilinmeyen Çalışma");
-        string modality = dataset.GetSingleValueOrDefault(DicomTag.Modality,"Bilinmeyen Modality");
-        
-        // converting series to string
-        string series = dataset.GetSingleValueOrDefault(DicomTag.SeriesNumber, 0).ToString();
-        
-        // extracting row pixels and column pixels and merging
-        int rows = dataset.GetSingleValueOrDefault(DicomTag.Rows, 0);
-        int columns = dataset.GetSingleValueOrDefault(DicomTag.Columns, 0);
-        string resolution = $"{rows}x{columns}";
 
         var existingStudy = await _context.Studies
             .Include(s => s.DicomFiles)
@@ -110,17 +93,10 @@ public class StudyService : IStudyService
         // Entity olan targetStudy'i DTO'ya (Taşıyıcıya) çeviriyoruz:
         var resultDto = targetStudy.Adapt<StudyResponseDto>();
 
-        return new ApiResponse<StudyResponseDto>
-        {
-            Success = true,
-            Message = existingStudy == null 
-                ? "Yeni DICOM çalışması ve dosyası başarıyla eklendi." 
-                : "DICOM dosyası mevcut çalışmanın altına başarıyla eklendi.",
-            Data = resultDto
-        };
+        return ServiceResult<StudyResponseDto>.IsSuccess(resultDto);
     }
 
-    public async Task<ApiResponse<PagedListResponse<StudyResponseDto>>> GetAllStudiesAsync(int page, int limit, string sort, string sortDir, Guid userId)
+    public async Task<ServiceResult<PagedListResponse<StudyResponseDto>>> GetAllStudiesAsync(int page, int limit, string sort, string sortDir, Guid userId)
     {
         // Kişinin kendine ait verileri Listeleme ve Entity'leri DTO'ya dönüştürme:
         var query = _context.Studies
@@ -130,12 +106,7 @@ public class StudyService : IStudyService
         
         var pagedStudies = await query.ToPagedListAsync(page, limit, sort, sortDir);
         
-        return new ApiResponse<PagedListResponse<StudyResponseDto>>
-        {
-            Success = true,
-            Message = "Dicom çalışmaları başarıyla getirildi.",
-            Data = pagedStudies
-        };
+        return ServiceResult<PagedListResponse<StudyResponseDto>>.IsSuccess(pagedStudies);
     }
 
     private Study ExtractMetadataFromDicom(DicomDataset dataset, Guid userId){
